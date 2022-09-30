@@ -1,0 +1,22 @@
+DROP TABLE IF EXISTS department;
+DROP TABLE IF EXISTS position;
+
+CREATE TABLE department (
+    id INTEGER AUTO_INCREMENT PRIMARY KEY,
+    dept_name VARCHAR(30) NOT NULL
+);
+
+CREATE TABLE position (
+    id INTEGER AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(30) NOT NULL,
+    salary DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (department_id) REFERENCES department(id),
+);
+
+CREATE TABLE employee (
+    id INTEGER AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(30) NOT NULL,
+    last_name VARCHAR(30) NOT NULL,
+    FOREIGN KEY (position_id) REFERENCES position(id),
+    -- ADD MANAGER ID FOREIGN KEY THING HERE
+);
