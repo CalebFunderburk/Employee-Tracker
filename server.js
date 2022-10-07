@@ -2,7 +2,6 @@
 const express = require('express')
 
 // Modular code
-// const connection = require('./config/connection')
 const index = require('./app/index')
 
 // Format express
