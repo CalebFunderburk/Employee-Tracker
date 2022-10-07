@@ -1,6 +1,5 @@
 // Dependencies
 const inquirer = require('inquirer')
-const mysql = require('mysql2')
 const cTable = require('console.table')
 
 // Modular code
@@ -24,12 +23,12 @@ const firstPrompt = () => {
             name: 'menu',
             message: 'What would you like to do?',
             choices: ['View All Departments', 
-                      'View All Roles', 
+                      'View All Positions', 
                       'View All Employees', 
                       'Add A Department', 
-                      'Add A Role', 
+                      'Add A Position', 
                       'Add An Employee', 
-                      'Updated An Employee Role']
+                      'Updated An Employee Position']
         }
     ])
 
@@ -38,9 +37,14 @@ const firstPrompt = () => {
         switch (answer.menu) {
 
             // View all departments
-            case "View All Departments":
+            case 'View All Departments':
                 showDepartments()
                 break
+
+            // View all positions
+            case 'View All Positions':
+            showPositions()
+            break
         }
     })
 }
@@ -56,8 +60,38 @@ showDepartments = () => {
     `)
 
     // SQL query to obtain data
-    const sql = `SELECT * FROM department;`
+    const sql = `SELECT department.id AS ID, 
+                 dept_name AS Name 
+                 FROM department;`
 
+    // Run the query using mysql
+    connection.query(sql, (err, rows) => {
+        if (err) throw err
+        console.table(rows)
+        firstPrompt()
+    })
+}
+
+// Show all positions in the database
+showPositions = () => {
+
+    // Header
+    console.log(`
+    =================
+    | ALL POSITIONS |
+    =================
+    `)
+
+    // SQL query to obtain data
+    const sql = `SELECT position.id AS ID, 
+                 title AS Title, 
+                 salary AS Salary, 
+                 dept_name AS Department
+                 FROM position 
+                 JOIN department 
+                 ON position.department_id = department.id;`
+
+    // Run the query using mysql
     connection.query(sql, (err, rows) => {
         if (err) throw err
         console.table(rows)
