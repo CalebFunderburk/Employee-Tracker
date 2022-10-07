@@ -1,9 +1,9 @@
 // Dependencies
 const express = require('express')
-const inquirer = require('inquirer')
 
 // Modular code
 const db = require('./db/connection')
+const index = require('./assets/index')
 
 // Format express
 const app = express()
@@ -16,4 +16,5 @@ app.use(express.json())
 // Server ignition
 app.listen(PORT, () => {
     console.log(`You are currently tuned into port ${PORT}`)
+    index()
 })
