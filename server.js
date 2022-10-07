@@ -2,7 +2,7 @@
 const express = require('express')
 
 // Modular code
-const db = require('./db/connection')
+const db = require('./config/connection')
 const index = require('./assets/index')
 
 // Format express
