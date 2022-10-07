@@ -3,7 +3,7 @@ const mysql = require('mysql2')
 require('dotenv').config()
 
 // Mysql connection
-const db = mysql.createConnection(
+const connection = mysql.createConnection(
     {
         host: 'localhost',
         user: process.env.DB_USER,
@@ -14,4 +14,4 @@ const db = mysql.createConnection(
 )
 
 // File exports
-module.exports = db
+module.exports = connection

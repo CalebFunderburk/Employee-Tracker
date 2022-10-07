@@ -2,15 +2,15 @@
 const express = require('express')
 
 // Modular code
-const db = require('./config/connection')
-const index = require('./assets/index')
+// const connection = require('./config/connection')
+const index = require('./app/index')
 
 // Format express
 const app = express()
 const PORT = process.env.PORT || 3001
 
 // Middleware
-app.use(express.urlencoded({ extended: true }))
+app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
 
 // Server ignition
