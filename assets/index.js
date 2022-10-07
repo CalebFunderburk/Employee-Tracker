@@ -1,5 +1,6 @@
 // Dependencies
 const inquirer = require('inquirer')
+const cTable = require('console.table')
 
 // Test
 const test = () => {
