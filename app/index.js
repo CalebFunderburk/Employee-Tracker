@@ -50,6 +50,11 @@ const firstPrompt = () => {
             case 'View All Employees':
                 showEmployees()
                 break
+
+            // Add a department
+            case 'Add A Department':
+                addDepartment()
+                break
         }
     })
 }
@@ -134,6 +139,48 @@ showEmployees = () => {
         if (err) throw err
         console.table(rows)
         firstPrompt()
+    })
+}
+
+addDepartment = () => {
+   
+    // Header
+    console.log(`
+    ====================
+    | ADD A DEPARTMENT |
+    ====================
+    `)
+
+    // Prompt for user to answer
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'addDept',
+            message: 'What is the name of the new department?',
+            validate: addDept => {
+                if (addDept) {
+                    return true
+                } else {
+                    console.log('Please enter the name of the department!')
+                    return false
+                }
+            }
+        }
+    ])
+
+    // Use the answer to add a department
+    .then(answer => {
+
+        // SQL query to add a department
+        const sql = `INSERT INTO department (dept_name)
+                     VALUES (?);`
+        
+        // Run the query using mysql
+        connection.query(sql, answer.addDept, (err, res) => {
+            if (err) throw err
+            console.table(`${answer.addDept} has been added as a department!`)
+            firstPrompt()
+        })
     })
 }
 
