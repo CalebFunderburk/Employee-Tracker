@@ -4,7 +4,7 @@ CREATE DATABASE business_db;
 USE business_db;
 
 DROP TABLE IF EXISTS department;
-DROP TABLE IF EXISTS position;
+DROP TABLE IF EXISTS profession;
 DROP TABLE IF EXISTS employee;
 
 CREATE TABLE department (
@@ -12,22 +12,22 @@ CREATE TABLE department (
     dept_name VARCHAR(30) NOT NULL
 );
 
-CREATE TABLE position (
+CREATE TABLE profession (
     id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(30) NOT NULL,
     salary DECIMAL(10,2) NOT NULL,
     department_id INTEGER,
-    FOREIGN KEY (department_id) REFERENCES department(id)
+    CONSTRAINT fk_department FOREIGN KEY (department_id) REFERENCES department(id)
 );
 
 CREATE TABLE employee (
     id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
     first_name VARCHAR(30) NOT NULL,
     last_name VARCHAR(30) NOT NULL,
-    position_id INTEGER,
+    profession_id INTEGER,
     manager_id INTEGER,
-    -- FOREIGN KEY (position_id) REFERENCES position(id),
-    FOREIGN KEY (manager_id) REFERENCES employee(id)
+    CONSTRAINT fk_profession FOREIGN KEY (profession_id) REFERENCES profession(id),
+    CONSTRAINT fk_manager FOREIGN KEY (manager_id) REFERENCES employee(id)
 );
 
 INSERT INTO department (dept_name)
@@ -37,7 +37,7 @@ VALUES
     ('Finance'),
     ('Legal');
 
-INSERT INTO position (title, salary, department_id)
+INSERT INTO profession (title, salary, department_id)
 VALUES
     ('Salesperson', 80000, 1),
     ('Sales Lead', 100000, 1),
@@ -48,7 +48,7 @@ VALUES
     ('Lawyer', 190000, 4),
     ('Legal Team Lead', 250000, 4);
 
-INSERT INTO employee (first_name, last_name, position_id, manager_id)
+INSERT INTO employee (first_name, last_name, profession_id, manager_id)
 VALUES
     ('John', 'Doe', 2, null),
     ('Mike', 'Chan', 1, 1),

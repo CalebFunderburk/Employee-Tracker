@@ -23,12 +23,12 @@ const firstPrompt = () => {
             name: 'menu',
             message: 'What would you like to do?',
             choices: ['View All Departments', 
-                      'View All Positions', 
+                      'View All Professions', 
                       'View All Employees', 
                       'Add A Department', 
-                      'Add A Position', 
+                      'Add A Profession', 
                       'Add An Employee', 
-                      'Update An Employee Position']
+                      'Update An Employee Profession']
         }
     ])
 
@@ -41,9 +41,9 @@ const firstPrompt = () => {
                 showDepartments()
                 break
 
-            // View all positions
-            case 'View All Positions':
-                showPositions()
+            // View all professions
+            case 'View All Professions':
+                showProfessions()
                 break
 
             // View all employees
@@ -56,9 +56,9 @@ const firstPrompt = () => {
                 addDepartment()
                 break
 
-            // Add a position
-            case 'Add A Position':
-                addPosition()
+            // Add a profession
+            case 'Add A Profession':
+                addProfession()
                 break
             
             // Add an employee
@@ -66,8 +66,8 @@ const firstPrompt = () => {
                 addEmployee()
                 break
 
-            // Updated an employee position
-            case 'Update An Employee Position':
+            // Updated an employee profession
+            case 'Update An Employee Profession':
                 updateEmployee()
                 break
         }
@@ -97,23 +97,23 @@ showDepartments = () => {
     })
 }
 
-// Show all positions in the database
-showPositions = () => {
+// Show all professions in the database
+showProfessions = () => {
 
     // Header
     console.log(`
-    =================
-    | ALL POSITIONS |
-    =================
+    ===================
+    | ALL PROFESSIONS |
+    ===================
     `)
 
     // SQL query to obtain data
-    const sql = `SELECT position.id AS ID, 
+    const sql = `SELECT profession.id AS ID, 
                         title AS Title,  
                         dept_name AS Department,
                         salary AS Salary
-                 FROM position 
-                 JOIN department ON position.department_id = department.id;`
+                 FROM profession 
+                 JOIN department ON profession.department_id = department.id;`
 
     // Run the query using mysql
     connection.query(sql, (err, rows) => {
@@ -133,18 +133,18 @@ showEmployees = () => {
     =================
     `)
 
-    // SQL query to obtain data ====> NEED TO ADD SALARY, DEPARTMENT. AND POSITION TO THIS QUERY BUT THE DAMN THING WONT WORK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // SQL query to obtain data ====> NEED TO ADD SALARY, DEPARTMENT. AND PROFESSION TO THIS QUERY BUT THE DAMN THING WONT WORK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     const sql = `SELECT e.id AS ID,
                         e.first_name AS First_Name,
                         e.last_name AS Last_Name,
-                        position.title AS Position,
+                        profession.title AS Profession,
                         department.dept_name AS Department,
-                        position.salary AS Salary,
+                        profession.salary AS Salary,
                         CONCAT(m.first_name, " ", m.last_name) AS Manager
                 FROM employee e
                 LEFT JOIN employee m ON e.manager_id = m.id
-                LEFT JOIN position ON e.position_id = position.id
-                LEFT JOIN department ON position.department_id = department.id;`
+                LEFT JOIN profession ON e.profession_id = profession.id
+                LEFT JOIN department ON profession.department_id = department.id;`
 
     // Run the query using mysql
     connection.query(sql, (err, rows) => {
@@ -170,8 +170,8 @@ addDepartment = () => {
             type: 'input',
             name: 'addDept',
             message: 'What is the name of the new department?',
-            validate: addDept => {
-                if (addDept) {
+            validate: input => {
+                if (input) {
                     return true
                 } else {
                     console.log('Please enter the name of the department!')
@@ -192,20 +192,20 @@ addDepartment = () => {
         // Run the query using mysql
         connection.query(sql, answer.addDept, (err, res) => {
             if (err) throw err
-            console.table(`${answer.addDept} has been added as a department!`)
+            console.log(`${answer.addDept} has been added as a department!`)
             firstPrompt()
         })
     })
 }
 
-// Add a position to the database ====> STILL NEED TO FIX THIS FUNCTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-addPosition = () => {
+// Add a profession to the database ====> STILL NEED TO FIX THIS FUNCTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+addProfession = () => {
 
     // Header
     console.log(`
-    ==================
-    | ADD A POSITION |
-    ==================
+    ====================
+    | ADD A PROFESSION |
+    ====================
     `)
 
     // SQL query to obtain list of departments
@@ -222,33 +222,33 @@ addPosition = () => {
         inquirer.prompt([
             {
                 type: 'input',
-                name: 'addPos',
-                message: 'What is the name of the position you would like to add?',
-                validate: addPos => {
-                    if (addPos) {
+                name: 'profession',
+                message: 'What is the name of the profession you would like to add?',
+                validate: input => {
+                    if (input) {
                         return true
                     } else {
-                        console.log('Please enter the name of the position you would like to add!')
+                        console.log('Please enter the name of the profession you would like to add!')
                         return false
                     }
                 }
             },
             {
                 type: 'number',
-                name: 'addSalary',
-                message: 'What is the salary for this position?',
-                validate: addSalary => {
-                    if (addSalary) {
+                name: 'salary',
+                message: 'What is the salary for this profession?',
+                validate: input => {
+                    if (input) {
                         return true
                     } else {
-                        console.log('Please enter a valid salary for this position!')
+                        console.log('Please enter a valid salary for this profession!')
                         return false
                     }
                 }
             },
             {
                 type: 'list',
-                name: 'addDept',
+                name: 'department',
                 message: 'What department does this role belong to?',
                 choices: deptArr
             }
@@ -256,17 +256,17 @@ addPosition = () => {
         .then(answer => {
 
             // Store the answers into an array
-            const answerArr = [answer.addPos, answer.addSalary, answer.addDept]
-
-            // SQL query to add a position
-            const sql = `INSERT INTO position (title, salary, department_id)
+            const answerArr = [answer.profession, answer.salary, answer.department]
+            
+            // SQL query to add a profession
+            const sql = `INSERT INTO profession (title, salary, department_id)
                                 VALUES
                                     (?, ?, ?);`
             
             // Run the query using mysql
             connection.query(sql, answerArr, (err, res) => {
                 if (err) throw err
-                console.log(`${answerArr[0]} has been added as a position!`)
+                console.log(`${answerArr[0]} has been added as a profession!`)
                 firstPrompt()
             })
         })
@@ -283,8 +283,8 @@ addEmployee = () => {
     ===================
     `)
 
-    // SQL quesries to obtain all positions and managers
-    const posSql = `SELECT id, title FROM position;`
+    // SQL quesries to obtain all professions and managers
+    const posSql = `SELECT id, title FROM profession;`
     const manSql = `SELECT id, first_name, last_name FROM employee;`
 
     // Run the first query
@@ -307,8 +307,8 @@ addEmployee = () => {
                     type: 'input',
                     name: 'firstName',
                     message: 'What is the employees first name?',
-                    validate: firstName => {
-                        if (firstName) {
+                    validate: input => {
+                        if (input) {
                             return true
                         } else {
                             console.log('Please enter the employees first name!')
@@ -320,8 +320,8 @@ addEmployee = () => {
                     type: 'input',
                     name: 'lastName',
                     message: 'What is the employees last name?',
-                    validate: lastName => {
-                        if (lastName) {
+                    validate: input => {
+                        if (input) {
                             return true
                         } else {
                             console.log('Please enter the employees last name!')
@@ -331,8 +331,8 @@ addEmployee = () => {
                 },
                 {
                     type: 'list',
-                    name: 'position',
-                    message: 'What is the employees position?',
+                    name: 'profession',
+                    message: 'What is the employees profession?',
                     choices: posArr
                 },
                 {
@@ -345,10 +345,10 @@ addEmployee = () => {
             .then(answers => {
 
                 // Store answers into an array
-                const answerArr = [answers.firstName, answers.lastName, answers.position, answers.manager]
+                const answerArr = [answers.firstName, answers.lastName, answers.profession, answers.manager]
                 
                 // SQL query to add an employee
-                const sql = `INSERT INTO employee (first_name, last_name, position_id, manager_id)
+                const sql = `INSERT INTO employee (first_name, last_name, profession_id, manager_id)
                                         VALUES
                                             (?, ?, ?, ?);`
                 
@@ -364,7 +364,7 @@ addEmployee = () => {
     })
 }
 
-// Update an employees position in the database
+// Update an employees profession in the database
 updateEmployee = () => {
     
     // Header
@@ -374,9 +374,9 @@ updateEmployee = () => {
     ======================
     `)
 
-    // SQL quesries to obtain all positions and managers
+    // SQL quesries to obtain all professions and managers
     const empSql = `SELECT * FROM employee;`
-    const posSql = `SELECT * FROM position;`
+    const posSql = `SELECT * FROM profession;`
 
     // Run the first query
     connection.query(empSql, (err, res) => {
@@ -397,28 +397,28 @@ updateEmployee = () => {
                 {
                     type: 'list',
                     name: 'employee',
-                    message: 'Pick an employee whose position you would like to change:',
+                    message: 'Pick an employee whose profession you would like to change:',
                     choices: empArr
                 },
                 {
                     type: 'list',
-                    name: 'position',
-                    message: 'What position would you like to assign this employee to?',
+                    name: 'profession',
+                    message: 'What profession would you like to assign this employee to?',
                     choices: posArr
                 }
             ])
             .then(answers => {
 
                 // Store answers into an array
-                const answerArr = [answers.position, answers.employee]
+                const answerArr = [answers.profession, answers.employee]
                 
                 // SQL query to update an employee
-                const sql = `UPDATE employee SET position_id = ? WHERE id = ?;`
+                const sql = `UPDATE employee SET profession_id = ? WHERE id = ?;`
 
                 // Run the query using mysql
                 connection.query(sql, answerArr, (err, res) => {
                     if (err) throw err
-                    console.log('The employees position has been updated!')
+                    console.log('The employees profession has been updated!')
                     firstPrompt()
                 })
             })
