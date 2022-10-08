@@ -4,6 +4,7 @@ const cTable = require('console.table')
 
 // Modular code
 const connection = require('../config/connection')
+const { connect } = require('../config/connection')
 
 // First prompt
 const firstPrompt = () => {
@@ -59,6 +60,11 @@ const firstPrompt = () => {
             // Add a position
             case 'Add A Position':
                 addPosition()
+                break
+            
+            // Add an employee
+            case 'Add An Employee':
+                addEmployee()
                 break
         }
     })
@@ -210,7 +216,7 @@ addPosition = () => {
         if (err) throw err
 
         // Store the list of departments into a new array
-        const dept = res.map(({ id, dept_name }) => ({ name: dept_name, value: id }))
+        const deptArr = res.map(({ id, dept_name }) => ({ name: dept_name, value: id }))
 
         // Prompts for user to answer
         inquirer.prompt([
@@ -244,7 +250,7 @@ addPosition = () => {
                 type: 'list',
                 name: 'addDept',
                 message: 'What department does this role belong to?',
-                choices: dept
+                choices: deptArr
             }
         ])
         .then(answer => {
@@ -256,7 +262,7 @@ addPosition = () => {
             const posSql = `INSERT INTO position (title, salary, department_id)
                              VALUES
                                 (?, ?, ?);`
-
+            
             // Run the query using mysql
             connection.query(posSql, answerArr, (err, res) => {
                 if (err) throw err
@@ -264,6 +270,96 @@ addPosition = () => {
                 firstPrompt()
             })
         })
+    })
+}
+
+addEmployee = () => {
+
+    // Header
+    console.log(`
+    ===================
+    | ADD AN EMPLOYEE |
+    ===================
+    `)
+
+    // SQL quesries to obtain all positions and managers
+    const posSql = `SELECT id, title FROM position;`
+    const manSql = `SELECT id, first_name, last_name FROM employee;`
+
+    // Run the first query
+    connection.query(posSql, (err, res) => {
+        if (err) throw err
+
+        // Store data from first query into new array
+        const posArr = res.map(({ id, title }) => ({ name: title, value: id }))
+
+        // Run the second query
+        connection.query(manSql, (err, res) => {
+            if (err) throw err
+
+            // Store data from second query into a new array
+            const manArr = res.map(({ id, first_name, last_name }) => ({ name: `${first_name} ${last_name}`, value: id }))
+
+            // Prompts for user to answer
+            inquirer.prompt([
+                {
+                    type: 'input',
+                    name: 'firstName',
+                    message: 'What is the employees first name?',
+                    validate: firstName => {
+                        if (firstName) {
+                            return true
+                        } else {
+                            console.log('Please enter the employees first name!')
+                            return false
+                        }
+                    }
+                },
+                {
+                    type: 'input',
+                    name: 'lastName',
+                    message: 'What is the employees last name?',
+                    validate: lastName => {
+                        if (lastName) {
+                            return true
+                        } else {
+                            console.log('Please enter the employees last name!')
+                            return false
+                        }
+                    }
+                },
+                {
+                    type: 'list',
+                    name: 'position',
+                    message: 'What is the employees position?',
+                    choices: posArr
+                },
+                {
+                    type: 'list',
+                    name: 'manager',
+                    message: 'Who is the employees manager?',
+                    choices: manArr
+                }
+            ])
+            .then(answers => {
+
+                // Store answers into an array
+                const answerArr = [answers.firstName, answers.lastName, answers.position, answers.manager]
+                
+                // SQL query to add an employee
+                const addEmpSql = `INSERT INTO employee (first_name, last_name, position_id, manager_id)
+                                    VALUES
+                                        (?, ?, ?, ?);`
+                
+                // Run the query using mysql
+                connection.query(addEmpSql, answerArr, (err, res) => {
+                    if (err) throw err
+                    console.log(`${answerArr[0]} ${answerArr[1]} has been added as an employee!`)
+                    firstPrompt()
+                })
+            })
+        })
+
     })
 }
 
