@@ -4,7 +4,6 @@ const cTable = require('console.table')
 
 // Modular code
 const connection = require('../config/connection')
-const { connect } = require('../config/connection')
 
 // First prompt
 const firstPrompt = () => {
@@ -29,7 +28,7 @@ const firstPrompt = () => {
                       'Add A Department', 
                       'Add A Position', 
                       'Add An Employee', 
-                      'Updated An Employee Position']
+                      'Update An Employee Position']
         }
     ])
 
@@ -66,6 +65,11 @@ const firstPrompt = () => {
             case 'Add An Employee':
                 addEmployee()
                 break
+
+            // Updated an employee position
+            case 'Update An Employee Position':
+                updateEmployee()
+                break
         }
     })
 }
@@ -82,7 +86,7 @@ showDepartments = () => {
 
     // SQL query to obtain data
     const sql = `SELECT department.id AS ID, 
-                 dept_name AS Name 
+                        dept_name AS Name 
                  FROM department;`
 
     // Run the query using mysql
@@ -105,12 +109,11 @@ showPositions = () => {
 
     // SQL query to obtain data
     const sql = `SELECT position.id AS ID, 
-                 title AS Title,  
-                 dept_name AS Department,
-                 salary AS Salary
+                        title AS Title,  
+                        dept_name AS Department,
+                        salary AS Salary
                  FROM position 
-                 JOIN department 
-                 ON position.department_id = department.id;`
+                 JOIN department ON position.department_id = department.id;`
 
     // Run the query using mysql
     connection.query(sql, (err, rows) => {
@@ -132,19 +135,16 @@ showEmployees = () => {
 
     // SQL query to obtain data ====> NEED TO ADD SALARY, DEPARTMENT. AND POSITION TO THIS QUERY BUT THE DAMN THING WONT WORK!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     const sql = `SELECT e.id AS ID,
-                 e.first_name AS First_Name,
-                 e.last_name AS Last_Name,
-                 position.title AS Position,
-                 department.dept_name AS Department,
-                 position.salary AS Salary,
-                 CONCAT(m.first_name, " ", m.last_name) AS Manager
-                 FROM employee e
-                 LEFT JOIN employee m
-                 ON e.manager_id = m.id
-                 LEFT JOIN position 
-                 ON e.position_id = position.id
-                 LEFT JOIN department
-                 ON position.department_id = department.id;`
+                        e.first_name AS First_Name,
+                        e.last_name AS Last_Name,
+                        position.title AS Position,
+                        department.dept_name AS Department,
+                        position.salary AS Salary,
+                        CONCAT(m.first_name, " ", m.last_name) AS Manager
+                FROM employee e
+                LEFT JOIN employee m ON e.manager_id = m.id
+                LEFT JOIN position ON e.position_id = position.id
+                LEFT JOIN department ON position.department_id = department.id;`
 
     // Run the query using mysql
     connection.query(sql, (err, rows) => {
@@ -186,8 +186,8 @@ addDepartment = () => {
 
         // SQL query to add a department
         const sql = `INSERT INTO department (dept_name)
-                     VALUES 
-                        (?);`
+                        VALUES 
+                            (?);`
         
         // Run the query using mysql
         connection.query(sql, answer.addDept, (err, res) => {
@@ -259,20 +259,21 @@ addPosition = () => {
             const answerArr = [answer.addPos, answer.addSalary, answer.addDept]
 
             // SQL query to add a position
-            const posSql = `INSERT INTO position (title, salary, department_id)
-                             VALUES
-                                (?, ?, ?);`
+            const sql = `INSERT INTO position (title, salary, department_id)
+                                VALUES
+                                    (?, ?, ?);`
             
             // Run the query using mysql
-            connection.query(posSql, answerArr, (err, res) => {
+            connection.query(sql, answerArr, (err, res) => {
                 if (err) throw err
-                console.log(`${answer.addPos} has been added as a position!`)
+                console.log(`${answerArr[0]} has been added as a position!`)
                 firstPrompt()
             })
         })
     })
 }
 
+// Add an employee to the database
 addEmployee = () => {
 
     // Header
@@ -347,12 +348,12 @@ addEmployee = () => {
                 const answerArr = [answers.firstName, answers.lastName, answers.position, answers.manager]
                 
                 // SQL query to add an employee
-                const addEmpSql = `INSERT INTO employee (first_name, last_name, position_id, manager_id)
-                                    VALUES
-                                        (?, ?, ?, ?);`
+                const sql = `INSERT INTO employee (first_name, last_name, position_id, manager_id)
+                                        VALUES
+                                            (?, ?, ?, ?);`
                 
                 // Run the query using mysql
-                connection.query(addEmpSql, answerArr, (err, res) => {
+                connection.query(sql, answerArr, (err, res) => {
                     if (err) throw err
                     console.log(`${answerArr[0]} ${answerArr[1]} has been added as an employee!`)
                     firstPrompt()
@@ -361,6 +362,68 @@ addEmployee = () => {
         })
 
     })
+}
+
+// Update an employees position in the database
+updateEmployee = () => {
+    
+    // Header
+    console.log(`
+    ======================
+    | UPDATE AN EMPLOYEE |
+    ======================
+    `)
+
+    // SQL quesries to obtain all positions and managers
+    const empSql = `SELECT * FROM employee;`
+    const posSql = `SELECT * FROM position;`
+
+    // Run the first query
+    connection.query(empSql, (err, res) => {
+        if (err) throw err
+
+        // Store data from first query into new array
+        const empArr = res.map(({ id, first_name, last_name }) => ({ name: `${first_name} ${last_name}`, value: id }))
+
+        // Run the second query
+        connection.query(posSql, (err, res) => {
+            if (err) throw err
+
+            // Store data from second query into a new array
+            const posArr = res.map(({ id, title }) => ({ name: title, value: id }))
+
+            // Prompts for user to answer
+            inquirer.prompt([
+                {
+                    type: 'list',
+                    name: 'employee',
+                    message: 'Pick an employee whose position you would like to change:',
+                    choices: empArr
+                },
+                {
+                    type: 'list',
+                    name: 'position',
+                    message: 'What position would you like to assign this employee to?',
+                    choices: posArr
+                }
+            ])
+            .then(answers => {
+
+                // Store answers into an array
+                const answerArr = [answers.position, answers.employee]
+                
+                // SQL query to update an employee
+                const sql = `UPDATE employee SET position_id = ? WHERE id = ?;`
+
+                // Run the query using mysql
+                connection.query(sql, answerArr, (err, res) => {
+                    if (err) throw err
+                    console.log('The employees position has been updated!')
+                    firstPrompt()
+                })
+            })
+        })
+    })    
 }
 
 // File exports
