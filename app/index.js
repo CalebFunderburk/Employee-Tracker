@@ -198,7 +198,7 @@ addDepartment = () => {
     })
 }
 
-// Add a profession to the database ====> STILL NEED TO FIX THIS FUNCTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// Add a profession to the database 
 addProfession = () => {
 
     // Header
