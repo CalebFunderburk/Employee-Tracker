@@ -5,7 +5,7 @@ const cTable = require('console.table')
 // Modular code
 const connection = require('../config/connection')
 
-// Test
+// First prompt
 const firstPrompt = () => {
 
     // Welcome
@@ -54,6 +54,11 @@ const firstPrompt = () => {
             // Add a department
             case 'Add A Department':
                 addDepartment()
+                break
+
+            // Add a position
+            case 'Add A Position':
+                addPosition()
                 break
         }
     })
@@ -109,6 +114,7 @@ showPositions = () => {
     })
 }
 
+// Show all employees in the database
 showEmployees = () => {
 
     // Header
@@ -142,6 +148,7 @@ showEmployees = () => {
     })
 }
 
+// Add a department to the database
 addDepartment = () => {
    
     // Header
@@ -173,13 +180,89 @@ addDepartment = () => {
 
         // SQL query to add a department
         const sql = `INSERT INTO department (dept_name)
-                     VALUES (?);`
+                     VALUES 
+                        (?);`
         
         // Run the query using mysql
         connection.query(sql, answer.addDept, (err, res) => {
             if (err) throw err
             console.table(`${answer.addDept} has been added as a department!`)
             firstPrompt()
+        })
+    })
+}
+
+// Add a position to the database ====> STILL NEED TO FIX THIS FUNCTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+addPosition = () => {
+
+    // Header
+    console.log(`
+    ==================
+    | ADD A POSITION |
+    ==================
+    `)
+
+    // SQL query to obtain list of departments
+    const sql = `SELECT * FROM department;`
+
+    // Run the query using mysql
+    connection.query(sql, (err, res) => {
+        if (err) throw err
+
+        // Store the list of departments into a new array
+        const dept = res.map(({ id, dept_name }) => ({ name: dept_name, value: id }))
+
+        // Prompts for user to answer
+        inquirer.prompt([
+            {
+                type: 'input',
+                name: 'addPos',
+                message: 'What is the name of the position you would like to add?',
+                validate: addPos => {
+                    if (addPos) {
+                        return true
+                    } else {
+                        console.log('Please enter the name of the position you would like to add!')
+                        return false
+                    }
+                }
+            },
+            {
+                type: 'number',
+                name: 'addSalary',
+                message: 'What is the salary for this position?',
+                validate: addSalary => {
+                    if (addSalary) {
+                        return true
+                    } else {
+                        console.log('Please enter a valid salary for this position!')
+                        return false
+                    }
+                }
+            },
+            {
+                type: 'list',
+                name: 'addDept',
+                message: 'What department does this role belong to?',
+                choices: dept
+            }
+        ])
+        .then(answer => {
+
+            // Store the answers into an array
+            const answerArr = [answer.addPos, answer.addSalary, answer.addDept]
+
+            // SQL query to add a position
+            const posSql = `INSERT INTO position (title, salary, department_id)
+                             VALUES
+                                (?, ?, ?);`
+
+            // Run the query using mysql
+            connection.query(posSql, answerArr, (err, res) => {
+                if (err) throw err
+                console.log(`${answer.addPos} has been added as a position!`)
+                firstPrompt()
+            })
         })
     })
 }
