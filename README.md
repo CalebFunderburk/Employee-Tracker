@@ -6,7 +6,7 @@ Employee Tracker is a command line application that uses MySQL to orchestrate an
 
 ## Requirements
 
-- Code editor (Visual Studio Code is reccomended)
+- Code editor (Visual Studio Code is recommended)
 - Command line terminal (GitBash, PowerShell, Terminal, etc.)
 - Most recent version of Node.JS
 - Most recent version on MySQL
