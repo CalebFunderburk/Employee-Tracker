@@ -11,7 +11,7 @@ Employee Tracker is a command line application that uses MySQL to orchestrate an
 - Most recent version of Node.JS
 - Most recent version on MySQL
 - Node packages used in the project
-- Clone the Dream Team project file onto your machine
+- Clone the Employee Tracker project file onto your machine
 
 ## How to use
 
